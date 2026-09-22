@@ -66,6 +66,14 @@
 #   endif
 #endif
 
+#if defined(__clang__)
+#   define MBEDTLS_AESCE_TARGET __attribute__((target("aes,crypto")))
+#elif defined(__GNUC__)
+#   define MBEDTLS_AESCE_TARGET __attribute__((target("+crypto")))
+#else
+#   define MBEDTLS_AESCE_TARGET
+#endif
+
 #if !defined(__ARM_FEATURE_AES) || defined(MBEDTLS_ENABLE_ARM_CRYPTO_EXTENSIONS_COMPILER_FLAG)
 #   if defined(__clang__)
 #       pragma clang attribute push (__attribute__((target("crypto"))), apply_to=function)
@@ -101,7 +109,7 @@ int mbedtls_aesce_has_support(void)
 #endif
 }
 
-__attribute__((target("aes,crypto")))
+MBEDTLS_AESCE_TARGET
 static uint8x16_t aesce_encrypt_block(uint8x16_t block,
                                       unsigned char *keys,
                                       int rounds)
@@ -126,7 +134,7 @@ static uint8x16_t aesce_encrypt_block(uint8x16_t block,
     return block;
 }
 
-__attribute__((target("aes,crypto")))
+MBEDTLS_AESCE_TARGET
 static uint8x16_t aesce_decrypt_block(uint8x16_t block,
                                       unsigned char *keys,
                                       int rounds)
@@ -184,7 +192,7 @@ int mbedtls_aesce_crypt_ecb(mbedtls_aes_context *ctx,
 /*
  * Compute decryption round keys from encryption round keys
  */
-__attribute__((target("aes,crypto")))
+MBEDTLS_AESCE_TARGET
 void mbedtls_aesce_inverse_key(unsigned char *invkey,
                                const unsigned char *fwdkey,
                                int nr)
@@ -206,7 +214,7 @@ static inline uint32_t aes_rot_word(uint32_t word)
     return (word << (32 - 8)) | (word >> 8);
 }
 
-__attribute__((target("aes,crypto")))
+MBEDTLS_AESCE_TARGET
 static inline uint32_t aes_sub_word(uint32_t in)
 {
     uint8x16_t v = vreinterpretq_u8_u32(vdupq_n_u32(in));
